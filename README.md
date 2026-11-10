@@ -92,31 +92,42 @@ Sistem ini menerapkan pola arsitektur **Front Controller & Modular View** berbas
 
 ### Diagram Alur Eksekusi (*Execution Flow*)
 
-```mermaid
-flowchart TD
-    A[Browser / Client Request] --> B[index.php (Front Controller)]
-    B --> C[config/db.php (Koneksi PDO)]
-    B --> D[Instansiasi Objek Model: Owner, Room, Tenant]
-    B --> E{Cek Parameter $_GET['page']}
-    
-    E -- 'owners' --> F[view/owners.php]
-    E -- 'rooms' (default) --> G[view/rooms.php]
-    E -- 'tenants' --> H[view/tenants.php]
-    
-    subgraph View Processing [Pemrosesan di View]
-        I{Ada Aksi?}
-        I -- Form POST (Create/Update) --> J[Panggil Method Model -> Redirect URL]
-        I -- GET delete --> K[Panggil Method Model -> Redirect URL]
-        I -- GET edit --> L[Ambil Data by ID -> Isi Nilai Form]
-        I -- Render Halaman --> M[Ambil Data getAll -> Cetak Tabel HTML]
-    end
-
-    F --> View Processing
-    G --> View Processing
-    H --> View Processing
-    
-    View Processing --> N[view/header.php & view/footer.php]
-    N --> O[Browser Response (Tampilan Lengkap)]
+```text
++-------------------------------------------------------------------+
+|                     Browser / Client Request                      |
++---------------------------------+---------------------------------+
+                                  |
+                                  v
++---------------------------------+---------------------------------+
+|                   index.php (Front Controller)                    |
++-----------------+---------------+-----------------+---------------+
+                  |               |                 |
+                  v               v                 v
+          [config/db.php]   [Instansiasi Model]  [Cek $_GET['page']]
+           (Koneksi PDO)   (Owner, Room, Tenant)    |
+                                                    +---> 'owners'  --> view/owners.php
+                                                    +---> 'rooms'   --> view/rooms.php (default)
+                                                    +---> 'tenants' --> view/tenants.php
+                                                              |
+                                                              v
++-------------------------------------------------------------+-----+
+|                      Pemrosesan di View                           |
+|                                                                   |
+|  * Form POST (Create/Update) -> Panggil Method Model -> Redirect  |
+|  * GET delete                -> Panggil Method Model -> Redirect  |
+|  * GET edit                  -> Ambil Data by ID     -> Pre-fill  |
+|  * Render Halaman            -> Ambil Data getAll()   -> Cetak     |
++-------------------------------------------------------------+-----+
+                                  |
+                                  v
++---------------------------------+---------------------------------+
+|               view/header.php & view/footer.php                   |
++---------------------------------+---------------------------------+
+                                  |
+                                  v
++---------------------------------+---------------------------------+
+|               Browser Response (Tampilan Lengkap)                 |
++-------------------------------------------------------------------+
 ```
 
 ### Tahapan Alur Kerja Kode
